@@ -3,7 +3,7 @@ const ctx = canvas.getContext('2d');
 canvas.width = 400;
 canvas.height = 400;
 
-let x = 200, y = 200, radius = 15;
+let x = 200, y = 200;
 let speed = 4;
 let score = 0;
 let bestScore = localStorage.getItem('bestScore') || 0;
@@ -22,30 +22,36 @@ let keys = {};
 let coins = [];
 let obstacles = [];
 
+const ballImg = new Image();
+ballImg.src = 'ball.png';
+
+const coinImg = new Image();
+coinImg.src = 'coin.png';
+
+const obstacleImg = new Image();
+obstacleImg.src = 'obstacle.png';
+
 function createCoins() {
     coins = [];
     for (let i = 0; i < 3; i++) {
         coins.push({
             x: Math.random() * (canvas.width - 20),
             y: Math.random() * (canvas.height - 20),
-            radius: 8
+            radius: 10
         });
     }
 }
 
 function drawCoins() {
-    ctx.fillStyle = '#FFD700';
     coins.forEach(coin => {
-        ctx.beginPath();
-        ctx.arc(coin.x, coin.y, coin.radius, 0, Math.PI * 2);
-        ctx.fill();
+        ctx.drawImage(coinImg, coin.x - 10, coin.y - 10, 20, 20);
     });
 }
 
 function collectCoins() {
     coins.forEach((coin, index) => {
         const dist = Math.hypot(x - coin.x, y - coin.y);
-        if (dist < radius + coin.radius) {
+        if (dist < 20) {
             coins.splice(index, 1);
             score += 10;
             timeLeft += 4;
@@ -53,7 +59,7 @@ function collectCoins() {
             coins.push({
                 x: Math.random() * (canvas.width - 20),
                 y: Math.random() * (canvas.height - 20),
-                radius: 8
+                radius: 10
             });
         }
     });
@@ -66,16 +72,15 @@ function createObstacles() {
             x: Math.random() * 300,
             y: Math.random() * 300,
             width: 50,
-            height: 10,
+            height: 20,
             dx: (Math.random() * 2 + 1) * (Math.random() > 0.5 ? 1 : -1)
         });
     }
 }
 
 function drawObstacles() {
-    ctx.fillStyle = '#ff0';
     obstacles.forEach(obs => {
-        ctx.fillRect(obs.x, obs.y, obs.width, obs.height);
+        ctx.drawImage(obstacleImg, obs.x, obs.y, obs.width, obs.height);
         obs.x += obs.dx;
         if (obs.x <= 0 || obs.x + obs.width >= canvas.width) {
             obs.dx *= -1;
@@ -85,8 +90,8 @@ function drawObstacles() {
 
 function checkObstacleCollision() {
     for (let obs of obstacles) {
-        if (x + radius > obs.x && x - radius < obs.x + obs.width &&
-            y + radius > obs.y && y - radius < obs.y + obs.height) {
+        if (x + 15 > obs.x && x - 15 < obs.x + obs.width &&
+            y + 15 > obs.y && y - 15 < obs.y + obs.height) {
             endGame();
         }
     }
@@ -101,15 +106,12 @@ function update() {
         if (keys['ArrowLeft'] || keys['a']) x -= speed;
         if (keys['ArrowRight'] || keys['d']) x += speed;
 
-        if (x - radius < 0) x = radius;
-        if (x + radius > canvas.width) x = canvas.width - radius;
-        if (y - radius < 0) y = radius;
-        if (y + radius > canvas.height) y = canvas.height - radius;
+        if (x - 15 < 0) x = 15;
+        if (x + 15 > canvas.width) x = canvas.width - 15;
+        if (y - 15 < 0) y = 15;
+        if (y + 15 > canvas.height) y = canvas.height - 15;
 
-        ctx.fillStyle = '#0f0';
-        ctx.beginPath();
-        ctx.arc(x, y, radius, 0, Math.PI * 2);
-        ctx.fill();
+        ctx.drawImage(ballImg, x - 15, y - 15, 30, 30);
 
         drawCoins();
         collectCoins();
